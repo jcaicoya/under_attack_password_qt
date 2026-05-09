@@ -1,0 +1,29 @@
+#pragma once
+
+#include <QWidget>
+
+class QFrame;
+class QHBoxLayout;
+class QLabel;
+class QPushButton;
+class QVBoxLayout;
+
+class ScreenPage : public QWidget
+{
+    Q_OBJECT
+
+public:
+    explicit ScreenPage(const QString& screenId, const QString& title, QWidget* parent = nullptr);
+
+    QVBoxLayout* contentLayout() const { return m_contentLayout; }
+    QPushButton* addNavButton(const QString& text);
+    void setTitle(const QString& title);
+
+private:
+    QLabel* m_idLabel = nullptr;
+    QLabel* m_titleLabel = nullptr;
+    QFrame* m_navFrame = nullptr;
+    QVBoxLayout* m_mainLayout = nullptr;
+    QVBoxLayout* m_contentLayout = nullptr;
+    QHBoxLayout* m_navLayout = nullptr;
+};
