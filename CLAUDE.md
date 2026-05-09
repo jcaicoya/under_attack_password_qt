@@ -17,7 +17,7 @@ It currently has placeholder screens and should be turned into the real Password
 
 - Executable target: `password`
 - Deployed executable: `password.exe`
-- Deploy zip prefix: `cybershow-password`
+- Deploy zip prefix: `bajo-ataque-password`
 - No arguments mean live mode.
 - Supported modes are only `--live` and `--demo`.
 - Runtime screens are operator-controlled.

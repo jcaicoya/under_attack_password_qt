@@ -13,7 +13,7 @@ $staging      = Join-Path $root "_staging"
 $appName      = "password"
 $targetName   = "password"
 $exeName      = "$targetName.exe"
-$zipPrefix    = "cybershow-password"
+$zipPrefix    = "bajo-ataque-password"
 
 function Test-GitRepo {
     git -C $root rev-parse --is-inside-work-tree 2>$null | Out-Null
