@@ -1,3 +1,11 @@
 {
-  "releases": []
+  "releases": [
+    {
+      "version": 0,
+      "commit": "8d8aae7",
+      "date": "2026-05-09T17:22:34",
+      "message": "Rename release zip prefix to bajo-ataque",
+      "zip": "bajo-ataque-password-v00.zip"
+    }
+  ]
 }
