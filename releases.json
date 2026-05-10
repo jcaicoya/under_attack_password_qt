@@ -6,6 +6,13 @@
       "date": "2026-05-09T17:22:34",
       "message": "Rename release zip prefix to bajo-ataque",
       "zip": "bajo-ataque-password-v00.zip"
+    },
+    {
+      "version": 1,
+      "commit": "b7fb332",
+      "date": "2026-05-10T09:32:00",
+      "message": "Package v00",
+      "zip": "bajo-ataque-password-v01.zip"
     }
   ]
 }
