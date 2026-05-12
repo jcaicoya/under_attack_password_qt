@@ -28,7 +28,6 @@
 #include <QVBoxLayout>
 #include <QtGlobal>
 
-#include <QProcess>
 #include <utility>
 
 namespace {
@@ -84,11 +83,6 @@ PasswordWindow::PasswordWindow(const cybershow::AppLaunchOptions& options, QWidg
             m_attackScreen, &AttackScreen::onClientDisconnected);
     connect(m_attackScreen, &AttackScreen::verdictReady,
             m_wsServer, &PasswordWsServer::sendVerdict);
-
-    // Set up ADB reverse tunnel so Android always connects to localhost
-    QProcess::startDetached(
-        "C:/Users/caico/AppData/Local/Android/Sdk/platform-tools/adb.exe",
-        {"reverse", "tcp:8767", "tcp:8767"});
 
     qApp->installEventFilter(this);
 }
