@@ -15,6 +15,8 @@ class QStackedWidget;
 
 class BottomNavBar;
 class ScreenPage;
+class AttackScreen;
+class PasswordWsServer;
 
 class PasswordWindow : public QMainWindow
 {
@@ -53,8 +55,10 @@ private:
     cybershow::AppLaunchOptions m_options;
     QList<Screen> m_screens;
 
-    QStackedWidget* m_stack = nullptr;
-    BottomNavBar* m_bottomNav = nullptr;
+    QStackedWidget*    m_stack      = nullptr;
+    BottomNavBar*      m_bottomNav  = nullptr;
+    AttackScreen*      m_attackScreen = nullptr;
+    PasswordWsServer*  m_wsServer     = nullptr;
 
     QLabel* m_modeBadge = nullptr;
     QGraphicsOpacityEffect* m_modeBadgeOpacity = nullptr;

@@ -1,6 +1,8 @@
 #include "PasswordWindow.h"
 
 #include "ScreenPage.h"
+#include "AttackScreen.h"
+#include "PasswordWsServer.h"
 #include "cybershow/common/CyberOperationalLog.h"
 #include "cybershow/common/CyberOrchestratorProtocol.h"
 #include "cybershow/ui/BottomNavBar.h"
@@ -26,6 +28,7 @@
 #include <QVBoxLayout>
 #include <QtGlobal>
 
+#include <QProcess>
 #include <utility>
 
 namespace {
@@ -63,14 +66,29 @@ PasswordWindow::PasswordWindow(const cybershow::AppLaunchOptions& options, QWidg
     , m_options(options)
 {
     m_screens = {
-        {1, QStringLiteral("principal"), QStringLiteral("Principal"), nullptr},
-        {2, QStringLiteral("segunda"), QStringLiteral("Segunda"), nullptr},
+        {1, QStringLiteral("ataque"), QStringLiteral("Ataque"), nullptr},
     };
 
     buildUi();
     wireNavigation();
     setupModeBadge();
     goTo(0);
+
+    // Start WebSocket server
+    m_wsServer = new PasswordWsServer(8767, this);
+    connect(m_wsServer, &PasswordWsServer::passwordReceived,
+            m_attackScreen, &AttackScreen::onPasswordReceived);
+    connect(m_wsServer, &PasswordWsServer::clientConnected,
+            m_attackScreen, &AttackScreen::onClientConnected);
+    connect(m_wsServer, &PasswordWsServer::clientDisconnected,
+            m_attackScreen, &AttackScreen::onClientDisconnected);
+    connect(m_attackScreen, &AttackScreen::verdictReady,
+            m_wsServer, &PasswordWsServer::sendVerdict);
+
+    // Set up ADB reverse tunnel so Android always connects to localhost
+    QProcess::startDetached(
+        "C:/Users/caico/AppData/Local/Android/Sdk/platform-tools/adb.exe",
+        {"reverse", "tcp:8767", "tcp:8767"});
 
     qApp->installEventFilter(this);
 }
@@ -90,12 +108,11 @@ void PasswordWindow::buildUi()
     m_stack = new QStackedWidget(central);
     m_bottomNav = new BottomNavBar(central);
 
-    m_screens[0].page = createPlaceholderPage(
-        QStringLiteral("Pantalla base"),
-        QStringLiteral("Contenido placeholder para la primera pantalla del nuevo modulo Cybershow."));
-    m_screens[1].page = createPlaceholderPage(
-        QStringLiteral("Segunda pantalla"),
-        QStringLiteral("Contenido placeholder para la segunda pantalla. Sustituir por la experiencia real de la app."));
+    m_attackScreen = new AttackScreen(this);
+    auto* attackPage = new ScreenPage(QStringLiteral("ataque"), QStringLiteral("ANÁLISIS DE CONTRASEÑA"), this);
+    attackPage->contentLayout()->setContentsMargins(0, 0, 0, 0);
+    attackPage->contentLayout()->addWidget(m_attackScreen, 1);
+    m_screens[0].page = attackPage;
 
     QStringList navLabels;
     for (const Screen& screen : std::as_const(m_screens)) {

@@ -12,6 +12,8 @@ find_package(Qt6 COMPONENTS
         Core
         Gui
         Widgets
+        WebSockets
+        Network
         REQUIRED)
 
 add_executable(password
@@ -20,6 +22,12 @@ add_executable(password
         src/PasswordWindow.cpp
         src/ScreenPage.h
         src/ScreenPage.cpp
+        src/AttackPanel.h
+        src/AttackPanel.cpp
+        src/AttackScreen.h
+        src/AttackScreen.cpp
+        src/PasswordWsServer.h
+        src/PasswordWsServer.cpp
         src/cybershow/common/CyberAppMode.h
         src/cybershow/common/CyberAppMode.cpp
         src/cybershow/common/CyberOperationalLog.h
@@ -36,6 +44,8 @@ target_link_libraries(password
         Qt::Core
         Qt::Gui
         Qt::Widgets
+        Qt::WebSockets
+        Qt::Network
 )
 
 target_include_directories(password PRIVATE
@@ -64,7 +74,7 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "${QT_INSTALL_PATH}/plugins/platforms/qwindows${DEBUG_SUFFIX}.dll"
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins/platforms/")
     endif ()
-    foreach (QT_LIB Core Gui Widgets)
+    foreach (QT_LIB Core Gui Widgets WebSockets Network)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 "${QT_INSTALL_PATH}/bin/Qt6${QT_LIB}${DEBUG_SUFFIX}.dll"

@@ -1,16 +1,30 @@
-# Password
+# CuarzoPolar — Password Qt
 
-Password is a Qt Widgets Cybershow application.
+Operator console for the `password` cybershow module. Receives passwords from the `password-android` app and runs theatrical attack simulations that the operator controls in real time.
 
-The app currently contains the common runtime shell and placeholder screens:
+Communicates with `password-android` over WebSocket on port `8767`, tunnelled via ADB reverse (`adb reverse tcp:8767 tcp:8767`) so the Android always connects to `localhost`.
 
-- two placeholder screens
-- shared Cybershow look and feel
-- bottom navigation, hidden by default
-- `F9` toggles the bottom navigation row
-- `F10` toggles the `DEMO` / `LIVE` badge
-- number keys and arrows navigate between screens
-- no Setup screen
+## Show flow
+
+1. `password-android` sends a password → appears on the operator screen.
+2. **Fuerza Bruta** panel activates automatically and starts cycling combinations.
+3. Operator clicks **ENCONTRADA** (found) or **FALLIDA** (failed) on each panel.
+4. If brute force fails → **Diccionario** activates. If that fails → **Oráculo** activates.
+5. For Oráculo the operator types the word and date the hook said aloud; the panel cycles combinations based on those inputs.
+6. Once a panel is marked found, the verdict (cracked + password) is sent to Android.
+7. If all three panels fail, operator clicks **ENVIAR SEGURA** → Android shows safe result.
+
+## Single screen: ANÁLISIS DE CONTRASEÑA
+
+Three attack panels side by side:
+
+| Panel | Method | Animation |
+|-------|--------|-----------|
+| FUERZA BRUTA | Short numeric / alphanumeric sequences | Random 4–5 digit strings |
+| DICCIONARIO | Common password wordlist | Cycles through ~40 common passwords |
+| ORÁCULO | Word + date combinations | Built from operator-entered inputs |
+
+Top bar shows live connection status and the received password (operator-visible only).
 
 ## Launch Modes
 
@@ -71,23 +85,40 @@ Run the built executable:
 
 During runtime:
 
-- `1` and `2` switch screens
-- `Left Arrow` and `Right Arrow` move between screens
 - `F9` shows or hides the bottom navigation row
 - `F10` shows or hides the `DEMO` / `LIVE` badge
 
-## Development Notes
+## ADB tunnel
 
-The first implementation step for this app is to replace the two placeholder screens in `PasswordWindow.cpp`.
+On startup the app runs `adb reverse tcp:8767 tcp:8767` automatically. If `adb` is not in PATH it falls back to the standard Android SDK location:
 
-Keep the shared Cybershow contract:
+```
+C:/Users/caico/AppData/Local/Android/Sdk/platform-tools/adb.exe
+```
 
-- no Setup screen
-- no arguments mean `--live`
-- `F9` toggles the bottom navigation row
-- `F10` toggles the `DEMO` / `LIVE` badge
-- number keys and arrows navigate between screens
-- read-only display widgets should stay non-focusable
+The device must already be connected (USB or wireless ADB) before starting the app, or the tunnel can be set up manually via `adb-bridge`.
+
+## Protocol
+
+**Android → Qt:**
+```json
+{"type": "password", "value": "the-password"}
+```
+
+**Qt → Android:**
+```json
+{"type": "verdict", "cracked": true,  "password": "the-password"}
+{"type": "verdict", "cracked": false}
+```
+
+## Source map
+
+| File | Purpose |
+|------|---------|
+| `PasswordWindow.h/.cpp` | Main window, WS server wiring, ADB tunnel setup |
+| `AttackScreen.h/.cpp` | Operator screen with three panels and verdict controls |
+| `AttackPanel.h/.cpp` | Single reusable attack panel (brute force / dictionary / oracle) |
+| `PasswordWsServer.h/.cpp` | WebSocket server on port 8767 |
 
 ## Release Packaging
 
