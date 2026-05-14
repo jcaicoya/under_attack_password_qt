@@ -28,6 +28,10 @@ add_executable(password
         src/AttackScreen.cpp
         src/PasswordWsServer.h
         src/PasswordWsServer.cpp
+        src/AppConfig.h
+        src/AppConfig.cpp
+        src/UdpBeacon.h
+        src/UdpBeacon.cpp
         src/cybershow/common/CyberAppMode.h
         src/cybershow/common/CyberAppMode.cpp
         src/cybershow/common/CyberOperationalLog.h

@@ -1,25 +1,39 @@
 #pragma once
-#include <QObject>
-#include <QWebSocketServer>
-#include <QList>
 
-class QWebSocket;
+#include <QDateTime>
+#include <QObject>
+#include <QTimer>
+#include <QWebSocket>
+#include <QWebSocketServer>
 
 class PasswordWsServer : public QObject {
     Q_OBJECT
+
 public:
-    explicit PasswordWsServer(quint16 port, QObject* parent = nullptr);
+    explicit PasswordWsServer(QObject* parent = nullptr);
     ~PasswordWsServer() override;
 
-    bool isListening() const;
+    bool    isClientConnected() const { return m_client != nullptr; }
+    quint16 port()              const { return m_port; }
+
     void sendVerdict(bool cracked, const QString& password = {});
 
 signals:
+    void clientConnected(bool connected);
     void passwordReceived(const QString& password);
-    void clientConnected();
-    void clientDisconnected();
+
+private slots:
+    void onNewConnection();
+    void onTextMessageReceived(const QString& msg);
+    void onClientDisconnected();
+    void onHeartbeatTick();
 
 private:
-    QWebSocketServer* m_server;
-    QList<QWebSocket*> m_clients;
+    void disconnectClient();
+
+    quint16           m_port        = 8767;
+    QWebSocketServer* m_server      = nullptr;
+    QWebSocket*       m_client      = nullptr;
+    QTimer            m_heartbeatTimer;
+    qint64            m_lastPongMs  = 0;
 };

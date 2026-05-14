@@ -17,6 +17,7 @@ class BottomNavBar;
 class ScreenPage;
 class AttackScreen;
 class PasswordWsServer;
+class UdpBeacon;
 
 class PasswordWindow : public QMainWindow
 {
@@ -59,6 +60,7 @@ private:
     BottomNavBar*      m_bottomNav  = nullptr;
     AttackScreen*      m_attackScreen = nullptr;
     PasswordWsServer*  m_wsServer     = nullptr;
+    UdpBeacon*         m_udpBeacon    = nullptr;
 
     QLabel* m_modeBadge = nullptr;
     QGraphicsOpacityEffect* m_modeBadgeOpacity = nullptr;

@@ -115,15 +115,15 @@ void AttackScreen::onPasswordReceived(const QString& password) {
     m_brutePanel->activate();
 }
 
-void AttackScreen::onClientConnected() {
-    m_connLabel->setText("● CONECTADO");
-    m_connLabel->setStyleSheet("color:#00FF55; font-family:'Courier New'; font-size:12px;");
-}
-
-void AttackScreen::onClientDisconnected() {
-    m_connLabel->setText("● SIN CONEXIÓN");
-    m_connLabel->setStyleSheet("color:#FF4444; font-family:'Courier New'; font-size:12px;");
-    resetAll();
+void AttackScreen::onClientConnected(bool connected) {
+    if (connected) {
+        m_connLabel->setText("● CONECTADO");
+        m_connLabel->setStyleSheet("color:#00FF55; font-family:'Courier New'; font-size:12px;");
+    } else {
+        m_connLabel->setText("● SIN CONEXIÓN");
+        m_connLabel->setStyleSheet("color:#FF4444; font-family:'Courier New'; font-size:12px;");
+        resetAll();
+    }
 }
 
 void AttackScreen::resetAll() {

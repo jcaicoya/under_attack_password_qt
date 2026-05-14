@@ -2,7 +2,9 @@
 
 #include "ScreenPage.h"
 #include "AttackScreen.h"
+#include "AppConfig.h"
 #include "PasswordWsServer.h"
+#include "UdpBeacon.h"
 #include "cybershow/common/CyberOperationalLog.h"
 #include "cybershow/common/CyberOrchestratorProtocol.h"
 #include "cybershow/ui/BottomNavBar.h"
@@ -73,16 +75,17 @@ PasswordWindow::PasswordWindow(const cybershow::AppLaunchOptions& options, QWidg
     setupModeBadge();
     goTo(0);
 
-    // Start WebSocket server
-    m_wsServer = new PasswordWsServer(8767, this);
+    // Start WebSocket server and UDP beacon
+    m_wsServer = new PasswordWsServer(this);
     connect(m_wsServer, &PasswordWsServer::passwordReceived,
             m_attackScreen, &AttackScreen::onPasswordReceived);
     connect(m_wsServer, &PasswordWsServer::clientConnected,
             m_attackScreen, &AttackScreen::onClientConnected);
-    connect(m_wsServer, &PasswordWsServer::clientDisconnected,
-            m_attackScreen, &AttackScreen::onClientDisconnected);
     connect(m_attackScreen, &AttackScreen::verdictReady,
             m_wsServer, &PasswordWsServer::sendVerdict);
+
+    m_udpBeacon = new UdpBeacon(static_cast<quint16>(AppConfig::instance().wsPort), this);
+    m_udpBeacon->start();
 
     qApp->installEventFilter(this);
 }

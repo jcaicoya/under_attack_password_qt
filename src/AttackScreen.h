@@ -11,8 +11,7 @@ public:
     explicit AttackScreen(QWidget* parent = nullptr);
 
     void onPasswordReceived(const QString& password);
-    void onClientConnected();
-    void onClientDisconnected();
+    void onClientConnected(bool connected);
 
 signals:
     void verdictReady(bool cracked, const QString& password);
