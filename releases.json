@@ -41,6 +41,13 @@
       "date": "2026-05-15T16:32:34",
       "message": "Fix WebSocket connection: single client, heartbeat, UDP beacon — matches phising/permission pattern",
       "zip": "bajo-ataque-password-v05.zip"
+    },
+    {
+      "version": 6,
+      "commit": "49b31e1",
+      "date": "2026-05-15T16:44:44",
+      "message": "Package v05",
+      "zip": "bajo-ataque-password-v06.zip"
     }
   ]
 }
