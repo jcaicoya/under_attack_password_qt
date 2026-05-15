@@ -1,12 +1,12 @@
 # CuarzoPolar — Password Qt
 
-Operator console for the `password` cybershow module. Receives passwords from the `password-android` app and runs theatrical attack simulations that the operator controls in real time.
+Operator console for the `password` cybershow module. Receives passwords from the `password_android` app and runs theatrical attack simulations that the operator controls in real time.
 
-Communicates with `password-android` over WebSocket on port `8767`, tunnelled via ADB reverse (`adb reverse tcp:8767 tcp:8767`) so the Android always connects to `localhost`.
+Communicates with `password_android` over WebSocket on port `8767`, tunnelled via ADB reverse (`adb reverse tcp:8767 tcp:8767`) so the Android always connects to `localhost`.
 
 ## Show flow
 
-1. `password-android` sends a password → appears on the operator screen.
+1. `password_android` sends a password → appears on the operator screen.
 2. **Fuerza Bruta** panel activates automatically and starts cycling combinations.
 3. Operator clicks **ENCONTRADA** (found) or **FALLIDA** (failed) on each panel.
 4. If brute force fails → **Diccionario** activates. If that fails → **Oráculo** activates.
@@ -31,12 +31,12 @@ Top bar shows live connection status and the received password (operator-visible
 No arguments means live mode.
 
 ```powershell
-password.exe
-password.exe --live
-password.exe --demo
-password.exe --fullscreen
-password.exe --windowed
-password.exe --screen 1
+under_attack_password_qt.exe
+under_attack_password_qt.exe --live
+under_attack_password_qt.exe --demo
+under_attack_password_qt.exe --fullscreen
+under_attack_password_qt.exe --windowed
+under_attack_password_qt.exe --screen 1
 ```
 
 Supported launch modes:
@@ -78,9 +78,9 @@ cmake --build build\msvc2022 --config Release
 Run the built executable:
 
 ```powershell
-.\build\msvc2022\Release\password.exe
-.\build\msvc2022\Release\password.exe --demo --windowed
-.\build\msvc2022\Release\password.exe --live --fullscreen
+.\build\msvc2022\Release\under_attack_password_qt.exe
+.\build\msvc2022\Release\under_attack_password_qt.exe --demo --windowed
+.\build\msvc2022\Release\under_attack_password_qt.exe --live --fullscreen
 ```
 
 During runtime:
@@ -131,5 +131,4 @@ Use the same deploy flow as the other Cybershow apps:
 
 The script builds Release, stages the executable and required Qt runtime files, creates `dist\bajo-ataque-password-vNN.zip`, updates `releases.json`, and creates a matching git tag when the project is inside a git repository.
 
-The deployable artifact is the zip under `dist\`. It contains `password.exe`, required Qt DLLs, the Windows platform plugin, this README, and `RUNBOOK.md`.
-
+The deployable artifact is the zip under `dist\`. It contains `under_attack_password_qt.exe`, required Qt DLLs, the Windows platform plugin, this README, and `RUNBOOK.md`.

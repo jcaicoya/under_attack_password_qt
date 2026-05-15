@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.28)
-project(password)
+project(under_attack_password_qt)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_AUTOMOC ON)
@@ -16,7 +16,7 @@ find_package(Qt6 COMPONENTS
         Network
         REQUIRED)
 
-add_executable(password
+add_executable(under_attack_password_qt
         src/main.cpp
         src/PasswordWindow.h
         src/PasswordWindow.cpp
@@ -44,7 +44,7 @@ add_executable(password
         src/cybershow/ui/CyberTheme.h
         src/cybershow/ui/CyberTheme.cpp)
 
-target_link_libraries(password
+target_link_libraries(under_attack_password_qt
         Qt::Core
         Qt::Gui
         Qt::Widgets
@@ -52,7 +52,7 @@ target_link_libraries(password
         Qt::Network
 )
 
-target_include_directories(password PRIVATE
+target_include_directories(under_attack_password_qt PRIVATE
         src
         src/cybershow/common
         src/cybershow/ui)
@@ -85,4 +85,3 @@ if (WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
                 "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
     endforeach (QT_LIB)
 endif ()
-

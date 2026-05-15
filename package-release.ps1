@@ -5,25 +5,63 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root         = $PSScriptRoot
-$buildDir     = Join-Path $root "build\msvc2022"
+$buildDir     = Join-Path $root "cmake-build-release"
 $distDir      = Join-Path $root "dist"
 $releasesFile = Join-Path $root "releases.json"
 $staging      = Join-Path $root "_staging"
 
-$appName      = "password"
-$targetName   = "password"
+$appName      = "under_attack_password_qt"
+$targetName   = "under_attack_password_qt"
 $exeName      = "$targetName.exe"
 $zipPrefix    = "bajo-ataque-password"
 
+function Invoke-Git {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Args
+    )
+    & git "-c" "safe.directory=*" -C $root @Args
+}
+
 function Test-GitRepo {
-    git -C $root rev-parse --is-inside-work-tree 2>$null | Out-Null
+    Invoke-Git "rev-parse" "--is-inside-work-tree" 2>$null | Out-Null
     return ($LASTEXITCODE -eq 0)
+}
+
+function Initialize-MsvcEnvironment {
+    $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+    if (-not (Test-Path $vswhere)) { return }
+    $vsPath = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+    if (-not $vsPath) { return }
+    $vcvars = Join-Path $vsPath "VC\Auxiliary\Build\vcvars64.bat"
+    if (-not (Test-Path $vcvars)) { return }
+    Write-Host ">> Initializing MSVC environment..."
+    $envLines = cmd /c "`"$vcvars`" > nul 2>&1 && set"
+    foreach ($line in $envLines) {
+        if ($line -match "^([^=]+)=(.*)$") {
+            [System.Environment]::SetEnvironmentVariable($Matches[1], $Matches[2], 'Process')
+        }
+    }
+}
+
+function Ensure-ReleaseBuildDir {
+    $cache = Join-Path $buildDir "CMakeCache.txt"
+    if (-not (Test-Path $cache)) { return }
+    $expected = [IO.Path]::GetFullPath($root).Replace('\','/')
+    $homeLine = Select-String -Path $cache -Pattern '^CMAKE_HOME_DIRECTORY:INTERNAL=' | Select-Object -First 1
+    if (-not $homeLine) { return }
+    $actual = ($homeLine.Line -replace '^CMAKE_HOME_DIRECTORY:INTERNAL=', '').Replace('\','/')
+    if ($actual -ieq $expected) { return }
+    Write-Host ">> Rebuilding cmake-build-release because cache points to old source dir:"
+    Write-Host "   $actual"
+    Remove-Item -LiteralPath $buildDir -Recurse -Force
+    New-Item -ItemType Directory -Path $buildDir | Out-Null
 }
 
 $hasGit = Test-GitRepo
 if ($hasGit) {
-    $commitShort = git -C $root rev-parse --short HEAD
-    $commitMsg   = git -C $root log -1 --pretty=%s
+    $commitShort = Invoke-Git "rev-parse" "--short" "HEAD"
+    $commitMsg   = Invoke-Git "log" "-1" "--pretty=%s"
 } else {
     $commitShort = "nogit"
     $commitMsg   = "Unversioned password package"
@@ -54,8 +92,15 @@ Write-Host "  Commit : $commitShort - $commitMsg"
 Write-Host "  Output : $zipName"
 Write-Host ""
 
-Write-Host ">> Configuring..."
-cmake -S $root -B $buildDir -DCMAKE_BUILD_TYPE=Release 2>&1 | Out-Null
+Initialize-MsvcEnvironment
+Ensure-ReleaseBuildDir
+
+if (-not (Test-Path "$buildDir\CMakeCache.txt")) {
+    Write-Host ">> Configuring (no existing build found)..."
+    cmake -S $root -B $buildDir -DCMAKE_BUILD_TYPE=Release 2>&1 | Out-Null
+} else {
+    Write-Host ">> Reusing existing cmake configuration in cmake-build-release..."
+}
 
 Write-Host ">> Building Release..."
 cmake --build $buildDir --config Release
@@ -77,6 +122,25 @@ Copy-Item (Join-Path $out "plugins\platforms\qwindows.dll") "$staging\plugins\pl
 Copy-Item (Join-Path $root "README.md")                     $staging
 Copy-Item (Join-Path $root "RUNBOOK.md")                    $staging
 
+$entryDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+$metadata = [PSCustomObject]@{
+    app     = $appName
+    version = $versionNum
+    commit  = $commitShort
+    date    = $entryDate
+    message = $commitMsg
+    zip     = $zipName
+}
+$metadata | ConvertTo-Json -Depth 5 | Set-Content (Join-Path $staging "version.json") -Encoding UTF8
+@(
+    "app=$($metadata.app)"
+    "version=$($metadata.version)"
+    "commit=$($metadata.commit)"
+    "date=$($metadata.date)"
+    "message=$($metadata.message)"
+    "zip=$($metadata.zip)"
+) | Set-Content (Join-Path $staging "BUILD_INFO.txt") -Encoding UTF8
+
 Write-Host ">> Creating zip..."
 if (-not (Test-Path $distDir)) { New-Item -ItemType Directory $distDir | Out-Null }
 if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
@@ -86,7 +150,7 @@ Remove-Item $staging -Recurse -Force
 $entry = [PSCustomObject]@{
     version = $versionNum
     commit  = $commitShort
-    date    = (Get-Date -Format "yyyy-MM-ddTHH:mm:ss")
+    date    = $entryDate
     message = $commitMsg
     zip     = $zipName
 }
@@ -96,7 +160,7 @@ $data | ConvertTo-Json -Depth 5 | Set-Content $releasesFile -Encoding UTF8
 
 if ($hasGit) {
     Write-Host ">> Tagging commit as $versionTag..."
-    git -C $root tag $versionTag 2>&1 | Out-Null
+    Invoke-Git "tag" $versionTag 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) {
         Write-Host "   Note: tag $versionTag already exists, skipped."
     }

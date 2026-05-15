@@ -16,7 +16,7 @@ It currently has placeholder screens and should be turned into the real Password
 ## Current Contract
 
 - Executable target: `password`
-- Deployed executable: `password.exe`
+- Deployed executable: `under_attack_password_qt.exe`
 - Deploy zip prefix: `bajo-ataque-password`
 - No arguments mean live mode.
 - Supported modes are only `--live` and `--demo`.

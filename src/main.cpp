@@ -77,7 +77,7 @@ void showMainWindow(PasswordWindow& window, const cybershow::AppLaunchOptions& o
 int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("password"));
+    app.setApplicationName(QStringLiteral("under_attack_password_qt"));
 
     cybershow::OperationalLog::configure(QStringLiteral("startup"), QStringLiteral("unknown"));
     cybershow::OperationalLog::write(QStringLiteral("INFO"), QStringLiteral("startup"), QStringLiteral("Application process started"));

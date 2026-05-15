@@ -7,37 +7,37 @@ Este documento es para el operador. Resume como arrancar y manejar la aplicacion
 Modo live por defecto:
 
 ```powershell
-password.exe
+under_attack_password_qt.exe
 ```
 
 Modo live explicito:
 
 ```powershell
-password.exe --live
+under_attack_password_qt.exe --live
 ```
 
 Modo demo:
 
 ```powershell
-password.exe --demo
+under_attack_password_qt.exe --demo
 ```
 
 Pantalla completa:
 
 ```powershell
-password.exe --live --fullscreen
+under_attack_password_qt.exe --live --fullscreen
 ```
 
 Ventana:
 
 ```powershell
-password.exe --demo --windowed
+under_attack_password_qt.exe --demo --windowed
 ```
 
 Seleccionar monitor:
 
 ```powershell
-password.exe --live --fullscreen --screen 1
+under_attack_password_qt.exe --live --fullscreen --screen 1
 ```
 
 ## Navegacion
