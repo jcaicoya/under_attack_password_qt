@@ -13,6 +13,34 @@
       "date": "2026-05-10T09:32:00",
       "message": "Package v00",
       "zip": "bajo-ataque-password-v01.zip"
+    },
+    {
+      "version": 2,
+      "commit": "3d7f26e",
+      "date": "2026-05-15T16:23:29",
+      "message": "Fix WebSocket connection: single client, heartbeat, UDP beacon ÔÇö matches phising/permission pattern",
+      "zip": "bajo-ataque-password-v02.zip"
+    },
+    {
+      "version": 3,
+      "commit": "3d7f26e",
+      "date": "2026-05-15T16:26:12",
+      "message": "Fix WebSocket connection: single client, heartbeat, UDP beacon ÔÇö matches phising/permission pattern",
+      "zip": "bajo-ataque-password-v03.zip"
+    },
+    {
+      "version": 4,
+      "commit": "nogit",
+      "date": "2026-05-15T16:32:13",
+      "message": "Unversioned password package",
+      "zip": "bajo-ataque-password-v04.zip"
+    },
+    {
+      "version": 5,
+      "commit": "3d7f26e",
+      "date": "2026-05-15T16:32:34",
+      "message": "Fix WebSocket connection: single client, heartbeat, UDP beacon — matches phising/permission pattern",
+      "zip": "bajo-ataque-password-v05.zip"
     }
   ]
 }
