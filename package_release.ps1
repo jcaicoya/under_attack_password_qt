@@ -16,7 +16,6 @@ $staging      = Join-Path $root "_staging"
 $appName      = "under_attack_password_qt"
 $targetName   = "under_attack_password_qt"
 $exeName      = "$targetName.exe"
-$zipPrefix    = "bajo-ataque-password"
 
 function Invoke-Git {
     param(
@@ -80,7 +79,7 @@ $last     = if ($releases.Count -gt 0) { $releases[-1] } else { $null }
 $alreadyPackaged = $last -and $last.commit -eq $commitShort
 $versionNum = if ($alreadyPackaged) { [int]$last.version } elseif ($releases.Count -eq 0) { 0 } else { [int]$last.version + 1 }
 $versionTag = "v{0:D2}" -f $versionNum
-$zipName    = "$zipPrefix-$versionTag.zip"
+$zipName    = "${projectName}_${versionTag}.zip"
 $zipPath    = Join-Path $distRoot $zipName
 $shouldPublishRelease = $Force -or (-not $alreadyPackaged) -or (-not (Test-Path $packageDir)) -or (-not (Test-Path $zipPath))
 
