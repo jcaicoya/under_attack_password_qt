@@ -15,7 +15,6 @@ struct AppLaunchOptions {
     bool fullscreen = false;
     bool windowed = false;
     int screenIndex = -1;
-    bool debug = false;
     QString originalModeArgument;
 };
 

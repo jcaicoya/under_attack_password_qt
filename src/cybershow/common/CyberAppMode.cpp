@@ -36,8 +36,6 @@ ParseResult parseAppLaunchOptions(const QStringList& arguments)
             result.options.fullscreen = true;
         } else if (arg == QStringLiteral("--windowed")) {
             result.options.windowed = true;
-        } else if (arg == QStringLiteral("--debug")) {
-            result.options.debug = true;
         } else if (arg == QStringLiteral("--screen")) {
             if (i + 1 >= arguments.size()) {
                 result.ok = false;
