@@ -121,6 +121,8 @@ if (-not (Test-Path (Join-Path $out $exeName))) {
 Copy-Item (Join-Path $out $exeName)                         $staging
 Copy-Item (Join-Path $out "Qt6Core.dll")                    $staging
 Copy-Item (Join-Path $out "Qt6Gui.dll")                     $staging
+Copy-Item (Join-Path $out "Qt6Network.dll")                 $staging
+Copy-Item (Join-Path $out "Qt6WebSockets.dll")              $staging
 Copy-Item (Join-Path $out "Qt6Widgets.dll")                 $staging
 Copy-Item (Join-Path $out "plugins\platforms\qwindows.dll") "$staging\plugins\platforms\"
 Copy-Item (Join-Path $root "README.md")                     $staging
