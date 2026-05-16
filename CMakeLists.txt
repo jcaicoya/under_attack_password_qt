@@ -16,7 +16,7 @@ find_package(Qt6 COMPONENTS
         Network
         REQUIRED)
 
-add_executable(under_attack_password_qt
+qt_add_executable(under_attack_password_qt
         src/main.cpp
         src/PasswordWindow.h
         src/PasswordWindow.cpp
@@ -44,7 +44,7 @@ add_executable(under_attack_password_qt
         src/cybershow/ui/CyberTheme.h
         src/cybershow/ui/CyberTheme.cpp)
 
-target_link_libraries(under_attack_password_qt
+target_link_libraries(under_attack_password_qt PRIVATE
         Qt::Core
         Qt::Gui
         Qt::Widgets

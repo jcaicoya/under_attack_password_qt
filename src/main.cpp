@@ -9,67 +9,41 @@
 #include <QGuiApplication>
 #include <QMessageBox>
 #include <QScreen>
-#include <QtGlobal>
 
 namespace {
 
-QRect availableGeometryForScreenIndex(int screenIndex)
+QScreen* targetScreen(const cybershow::AppLaunchOptions& options)
 {
     const auto screens = QGuiApplication::screens();
-    if (screenIndex >= 0 && screenIndex < screens.size()) {
-        return screens.at(screenIndex)->availableGeometry();
+    if (options.screenIndex >= 0 && options.screenIndex < screens.size()) {
+        return screens.at(options.screenIndex);
     }
-
-    if (const QScreen* screen = QGuiApplication::primaryScreen()) {
-        return screen->availableGeometry();
-    }
-
-    return {};
+    return QGuiApplication::primaryScreen();
 }
 
 double uiScaleForOptions(const cybershow::AppLaunchOptions& options)
 {
-    const QRect available = availableGeometryForScreenIndex(options.screenIndex);
-    if (available.isEmpty()) {
-        return 1.0;
-    }
-
-    return qBound(0.85, available.height() / 900.0, 1.15);
+    const QScreen* screen = targetScreen(options);
+    if (!screen) return 1.0;
+    return qBound(0.85, screen->geometry().height() / 900.0, 1.15);
 }
 
 void showMainWindow(PasswordWindow& window, const cybershow::AppLaunchOptions& options)
 {
-    const QRect available = availableGeometryForScreenIndex(options.screenIndex);
-    if (options.fullscreen) {
-        if (!available.isEmpty()) {
-            window.setGeometry(available);
-        }
-        window.showFullScreen();
-        return;
-    }
+    QScreen* screen = targetScreen(options);
 
     if (options.windowed) {
-        if (!available.isEmpty()) {
-            const QSize targetSize(
-                qBound(1024, int(available.width() * 0.90), 1680),
-                qBound(700, int(available.height() * 0.90), 1080));
-            const QRect targetRect(
-                QPoint(
-                    available.x() + (available.width() - targetSize.width()) / 2,
-                    available.y() + (available.height() - targetSize.height()) / 2),
-                targetSize);
-            window.setGeometry(targetRect.intersected(available));
-        } else {
-            window.resize(1024, 700);
+        if (screen) {
+            window.setGeometry(screen->availableGeometry());
         }
         window.show();
         return;
     }
 
-    if (!available.isEmpty()) {
-        window.setGeometry(available);
+    if (screen) {
+        window.move(screen->geometry().topLeft());
     }
-    window.showMaximized();
+    window.showFullScreen();
 }
 
 } // namespace
