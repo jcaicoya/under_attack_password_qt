@@ -62,6 +62,13 @@
       "date": "2026-05-16T10:39:54",
       "message": "Rename package-release.ps1 to package_release.ps1 (snake_case)",
       "zip": "bajo-ataque-password-v08.zip"
+    },
+    {
+      "version": 9,
+      "commit": "b9db207",
+      "date": "2026-05-16T13:58:45",
+      "message": "Publish releases directly to shared dist directories",
+      "zip": "bajo-ataque-password-v09.zip"
     }
   ]
 }
