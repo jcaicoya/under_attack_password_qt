@@ -76,6 +76,13 @@
       "date": "2026-05-16T14:14:17",
       "message": "Include networking DLLs in password Qt release",
       "zip": "bajo-ataque-password-v10.zip"
+    },
+    {
+      "version": 11,
+      "commit": "ef80cb8",
+      "date": "2026-05-16T17:36:42",
+      "message": "Store Qt release archives at dist root",
+      "zip": "password_qt_v11.zip"
     }
   ]
 }
