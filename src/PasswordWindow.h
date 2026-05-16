@@ -12,6 +12,7 @@ class QKeyEvent;
 class QPropertyAnimation;
 class QResizeEvent;
 class QStackedWidget;
+class QWidget;
 
 class BottomNavBar;
 class ScreenPage;
@@ -47,25 +48,34 @@ private:
     bool handleRuntimeKeyPress(QKeyEvent* event);
     bool focusIsEditable(QWidget* focusWidget) const;
 
-    void setupModeBadge();
-    void updateModeBadgeGeometry();
+    void setupBadgeOverlay();
+    void repositionBadgeOverlay();
     void updateModeBadgeText();
+    void updateConnectionBadge();
+    void updateBadgeOverlayVisibility();
     void setModeBadgeVisible(bool visible);
+    void setConnectionBadgeVisible(bool visible);
     void setBottomNavVisible(bool visible);
 
     cybershow::AppLaunchOptions m_options;
     QList<Screen> m_screens;
 
-    QStackedWidget*    m_stack      = nullptr;
-    BottomNavBar*      m_bottomNav  = nullptr;
+    QStackedWidget*    m_stack        = nullptr;
+    BottomNavBar*      m_bottomNav    = nullptr;
     AttackScreen*      m_attackScreen = nullptr;
     PasswordWsServer*  m_wsServer     = nullptr;
     UdpBeacon*         m_udpBeacon    = nullptr;
 
-    QLabel* m_modeBadge = nullptr;
-    QGraphicsOpacityEffect* m_modeBadgeOpacity = nullptr;
-    QPropertyAnimation* m_modeBadgeAnim = nullptr;
-    bool m_modeBadgeVisible = false;
+    // Badge overlay (F9 = conexión, F10 = modo)
+    QWidget*                m_badgeOverlay           = nullptr;
+    QLabel*                 m_modeBadge              = nullptr;
+    QLabel*                 m_connectionBadge        = nullptr;
+    QGraphicsOpacityEffect* m_badgeOpacity           = nullptr;
+    QPropertyAnimation*     m_badgePulse             = nullptr;
+    bool                    m_modeBadgeVisible       = false;
+    bool                    m_connectionBadgeVisible = false;
+    bool                    m_mobileConnected        = false;
+
     bool m_bottomNavVisible = false;
 };
 

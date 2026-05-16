@@ -28,6 +28,7 @@
 #include <QStackedWidget>
 #include <QTextEdit>
 #include <QVBoxLayout>
+#include <QWidget>
 #include <QtGlobal>
 
 #include <utility>
@@ -72,7 +73,7 @@ PasswordWindow::PasswordWindow(const cybershow::AppLaunchOptions& options, QWidg
 
     buildUi();
     wireNavigation();
-    setupModeBadge();
+    setupBadgeOverlay();
     goTo(0);
 
     // Start WebSocket server and UDP beacon
@@ -81,6 +82,10 @@ PasswordWindow::PasswordWindow(const cybershow::AppLaunchOptions& options, QWidg
             m_attackScreen, &AttackScreen::onPasswordReceived);
     connect(m_wsServer, &PasswordWsServer::clientConnected,
             m_attackScreen, &AttackScreen::onClientConnected);
+    connect(m_wsServer, &PasswordWsServer::clientConnected, this, [this](bool connected) {
+        m_mobileConnected = connected;
+        updateConnectionBadge();
+    });
     connect(m_attackScreen, &AttackScreen::verdictReady,
             m_wsServer, &PasswordWsServer::sendVerdict);
 
@@ -183,7 +188,7 @@ bool PasswordWindow::eventFilter(QObject* watched, QEvent* event)
 void PasswordWindow::resizeEvent(QResizeEvent* event)
 {
     QMainWindow::resizeEvent(event);
-    updateModeBadgeGeometry();
+    repositionBadgeOverlay();
 }
 
 bool PasswordWindow::focusIsEditable(QWidget* focusWidget) const
@@ -210,11 +215,17 @@ bool PasswordWindow::handleRuntimeKeyPress(QKeyEvent* event)
     case Qt::Key_Right:
         goToAdjacent(1);
         return true;
-    case Qt::Key_F9:
+    case Qt::Key_F8:
         setBottomNavVisible(!m_bottomNavVisible);
+        return true;
+    case Qt::Key_F9:
+        setConnectionBadgeVisible(!m_connectionBadgeVisible);
         return true;
     case Qt::Key_F10:
         setModeBadgeVisible(!m_modeBadgeVisible);
+        return true;
+    case Qt::Key_F11:
+        isFullScreen() ? showNormal() : showFullScreen();
         return true;
     default:
         break;
@@ -256,78 +267,113 @@ void PasswordWindow::goToAdjacent(int direction)
     goTo(next);
 }
 
-void PasswordWindow::setupModeBadge()
+void PasswordWindow::setupBadgeOverlay()
 {
-    m_modeBadge = new QLabel(this);
     const double scale = displayScaleForOptions(m_options);
+
+    m_badgeOverlay = new QWidget(this);
+    m_badgeOverlay->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_badgeOverlay->setFocusPolicy(Qt::NoFocus);
+    m_badgeOverlay->setStyleSheet("background: transparent;");
+
+    auto* layout = new QVBoxLayout(m_badgeOverlay);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(8);
+
+    m_modeBadge = new QLabel(m_badgeOverlay);
     m_modeBadge->setFocusPolicy(Qt::NoFocus);
     m_modeBadge->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     m_modeBadge->setTextInteractionFlags(Qt::NoTextInteraction);
-    m_modeBadge->setAlignment(Qt::AlignCenter);
-
-    const QString style = QString(
+    m_modeBadge->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_modeBadge->setStyleSheet(QString(
         "color: white; background: transparent; font-family: Consolas, monospace; "
         "font-size: %1px; font-weight: 900; letter-spacing: %2px;")
         .arg(qBound(46, int(56 * scale), 72))
-        .arg(qBound(4, int(6 * scale), 8));
-    m_modeBadge->setStyleSheet(style);
-
-    m_modeBadgeOpacity = new QGraphicsOpacityEffect(m_modeBadge);
-    m_modeBadgeOpacity->setOpacity(0.18);
-    m_modeBadge->setGraphicsEffect(m_modeBadgeOpacity);
-
-    m_modeBadgeAnim = new QPropertyAnimation(m_modeBadgeOpacity, "opacity", this);
-    m_modeBadgeAnim->setStartValue(0.18);
-    m_modeBadgeAnim->setKeyValueAt(0.5, 0.92);
-    m_modeBadgeAnim->setEndValue(0.18);
-    m_modeBadgeAnim->setDuration(2500);
-    m_modeBadgeAnim->setEasingCurve(QEasingCurve::InOutSine);
-    m_modeBadgeAnim->setLoopCount(-1);
-    m_modeBadgeAnim->start();
-
+        .arg(qBound(4, int(6 * scale), 8)));
     updateModeBadgeText();
-    updateModeBadgeGeometry();
-    setModeBadgeVisible(false);
+    m_modeBadge->hide();
+
+    m_connectionBadge = new QLabel(m_badgeOverlay);
+    m_connectionBadge->setFocusPolicy(Qt::NoFocus);
+    m_connectionBadge->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    m_connectionBadge->setTextInteractionFlags(Qt::NoTextInteraction);
+    m_connectionBadge->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    updateConnectionBadge();
+    m_connectionBadge->hide();
+
+    layout->addWidget(m_modeBadge);
+    layout->addWidget(m_connectionBadge);
+
+    m_badgeOpacity = new QGraphicsOpacityEffect(m_badgeOverlay);
+    m_badgeOpacity->setOpacity(0.18);
+    m_badgeOverlay->setGraphicsEffect(m_badgeOpacity);
+
+    m_badgePulse = new QPropertyAnimation(m_badgeOpacity, "opacity", this);
+    m_badgePulse->setStartValue(0.18);
+    m_badgePulse->setKeyValueAt(0.5, 0.92);
+    m_badgePulse->setEndValue(0.18);
+    m_badgePulse->setDuration(2500);
+    m_badgePulse->setEasingCurve(QEasingCurve::InOutSine);
+    m_badgePulse->setLoopCount(-1);
+    m_badgePulse->start();
+
+    m_badgeOverlay->hide();
+    repositionBadgeOverlay();
+}
+
+void PasswordWindow::repositionBadgeOverlay()
+{
+    if (!m_badgeOverlay) return;
+    m_badgeOverlay->adjustSize();
+    const int x = width() - m_badgeOverlay->width() - 48;
+    const int y = (height() - m_badgeOverlay->height()) / 2;
+    m_badgeOverlay->move(qMax(0, x), qMax(0, y));
+    m_badgeOverlay->raise();
 }
 
 void PasswordWindow::updateModeBadgeText()
 {
-    if (!m_modeBadge) {
-        return;
-    }
-
+    if (!m_modeBadge) return;
     m_modeBadge->setText(m_options.launchMode == cybershow::LaunchMode::Demo
         ? QStringLiteral("DEMO")
         : QStringLiteral("LIVE"));
 }
 
-void PasswordWindow::updateModeBadgeGeometry()
+void PasswordWindow::updateConnectionBadge()
 {
-    if (!m_modeBadge) {
-        return;
-    }
+    if (!m_connectionBadge) return;
+    const double scale = displayScaleForOptions(m_options);
+    const QString color = m_mobileConnected ? QStringLiteral("#00FF55") : QStringLiteral("#FF3347");
+    const QString text  = m_mobileConnected ? QStringLiteral("ENLACE ACTIVO") : QStringLiteral("SIN ENLACE");
+    m_connectionBadge->setText(text);
+    m_connectionBadge->setStyleSheet(QString(
+        "color: %1; background: transparent; font-family: Consolas, monospace; "
+        "font-size: %2px; font-weight: 900;")
+        .arg(color)
+        .arg(qBound(20, int(28 * scale), 36)));
+    repositionBadgeOverlay();
+}
 
-    const QSize badgeSize = m_modeBadge->sizeHint().expandedTo(QSize(200, 84));
-    const int marginRight = qMax(32, width() / 18);
-    const int x = qMax(0, width() - badgeSize.width() - marginRight);
-    const int y = qMax(0, (height() - badgeSize.height()) / 2);
-    m_modeBadge->setGeometry(x, y, badgeSize.width(), badgeSize.height());
-    m_modeBadge->raise();
+void PasswordWindow::updateBadgeOverlayVisibility()
+{
+    if (!m_badgeOverlay) return;
+    if (m_modeBadge)       m_modeBadge->setVisible(m_modeBadgeVisible);
+    if (m_connectionBadge) m_connectionBadge->setVisible(m_connectionBadgeVisible);
+    m_badgeOverlay->setVisible(m_modeBadgeVisible || m_connectionBadgeVisible);
+    repositionBadgeOverlay();
 }
 
 void PasswordWindow::setModeBadgeVisible(bool visible)
 {
     m_modeBadgeVisible = visible;
-    if (!m_modeBadge) {
-        return;
-    }
-
     updateModeBadgeText();
-    updateModeBadgeGeometry();
-    m_modeBadge->setVisible(visible);
-    if (visible) {
-        m_modeBadge->raise();
-    }
+    updateBadgeOverlayVisibility();
+}
+
+void PasswordWindow::setConnectionBadgeVisible(bool visible)
+{
+    m_connectionBadgeVisible = visible;
+    updateBadgeOverlayVisibility();
 }
 
 void PasswordWindow::setBottomNavVisible(bool visible)
