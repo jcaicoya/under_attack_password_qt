@@ -90,6 +90,13 @@
       "date": "2026-05-16T19:14:36",
       "message": "Align F-keys and badge overlay with permission_qt",
       "zip": "password_qt_v12.zip"
+    },
+    {
+      "version": 13,
+      "commit": "d2a54f9",
+      "date": "2026-05-17T11:58:35",
+      "message": "Standardize project docs and package runbook",
+      "zip": "password_qt_v13.zip"
     }
   ]
 }
