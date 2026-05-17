@@ -124,7 +124,6 @@ Copy-Item (Join-Path $out "Qt6Network.dll")                 $staging
 Copy-Item (Join-Path $out "Qt6WebSockets.dll")              $staging
 Copy-Item (Join-Path $out "Qt6Widgets.dll")                 $staging
 Copy-Item (Join-Path $out "plugins\platforms\qwindows.dll") "$staging\plugins\platforms\"
-Copy-Item (Join-Path $root "README.md")                     $staging
 Copy-Item (Join-Path $root "RUNBOOK.md")                    $staging
 
 $entryDate = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
